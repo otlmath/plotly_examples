@@ -2,33 +2,53 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 
-# Generate random data for male and female groups
-num_samples = 100
+# Generate fake data
+np.random.seed(42)  # For reproducibility
+male_height = np.random.normal(175, 7, 100)
+male_weight = np.random.normal(75, 10, 100)
+female_height = np.random.normal(163, 6, 100)
+female_weight = np.random.normal(60, 8, 100)
 
-# Male data
-male_weights = np.random.normal(180, 20, num_samples)  # Mean weight 180 lbs, std dev 20 lbs
-male_heights = np.random.normal(70, 3, num_samples)    # Mean height 70 inches, std dev 3 inches
-
-# Female data
-female_weights = np.random.normal(140, 15, num_samples)  # Mean weight 140 lbs, std dev 15 lbs
-female_heights = np.random.normal(65, 2.5, num_samples)  # Mean height 65 inches, std dev 2.5 inches
-
-male_df = pd.DataFrame({
-    'weight': male_weights,
-    'height': male_heights,
-    'gender': ['male'] * len(male_weights)  # Create a list of 'male' strings
+# Create a Pandas DataFrame
+data = pd.DataFrame({
+    'Height': np.concatenate([male_height, female_height]),
+    'Weight': np.concatenate([male_weight, female_weight]),
+    'Gender': ['Male'] * 100 + ['Female'] * 100
 })
 
-female_df = pd.DataFrame({
-    'weight': female_weights,
-    'height': female_heights,
-    'gender': ['female'] * len(female_weights)  # Create a list of 'female' strings
-})
-data = pd.concat([male_df, female_df], ignore_index=True)
+# Create scatter plot with Plotly Express
+fig = px.scatter(
+    data,
+    x='Height',
+    y='Weight',
+    color='Gender',
+    title='Height vs Weight',
+    category_orders={'Gender': ['Male', 'Female']}  # Ensure consistent color order
+)
 
-# Create a scatter plot
-fig = px.scatter(data_frame=data, x='height', y='weight', color='gender',
-                 title='Simple Scatter Plot')
+# Add selector
+fig.update_layout(
+    updatemenus=[
+        dict(
+            active=0,
+            buttons=list([
+                dict(label='All',
+                     method='update',
+                     args=[{'visible': [True, True]}]),
+                dict(label='Male',
+                     method='update',
+                     args=[{'visible': [True, False]}]),
+                dict(label='Female',
+                     method='update',
+                     args=[{'visible': [False, True]}])
+            ]),
+            x=0.8,
+            y=1.15,
+            xanchor='left',
+            yanchor='top',
+        )
+    ],
+    margin=dict(t=50),
+)
 
-# Show the plot
 fig.show()
